@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人资料库 | 笔记·文案·收藏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root{
+            --primary:#409eff;
+            --bg-page:#f5f7fa;
+            --bg-card:#ffffff;
+            --bg-form:#f8faff;
+            --text-main:#2c333f;
+            --text-sub:#64748b;
+            --border-radius:16px;
+            --shadow:0 4px 14px rgba(0,0,0,0.07);
+            --tag-bg:#e6f0ff;
+            --tag-color:#409eff;
+        }
+        body.dark{
+            --bg-page:#171c26;
+            --bg-card:#222935;
+            --bg-form:#2a313f;
+            --text-main:#e8ecf3;
+            --text-sub:#94a3b8;
+            --tag-bg:#273448;
+        }
+        body {
+            font-family: system-ui, "Microsoft Yahei",sans-serif;
+            background-color: var(--bg-page);
+            color:var(--text-main);
+            line-height:1.7;
+            transition: background 0.3s,color 0.3s;
+        }
+        .container{
+            max-width:1040px;
+            margin:0 auto;
+            padding:22px 16px;
+        }
+        header{
+            background: linear-gradient(135deg,#338de9,#57a8ff);
+            color:white;
+            padding:48px 24px;
+            border-radius:var(--border-radius);
+            text-align:center;
+            margin-bottom:28px;
+            position:relative;
+        }
+        .theme-toggle{
+            position:absolute;
+            top:16px;
+            right:86px;
+            border:1px solid rgba(255,255,255,0.45);
+            background:rgba(255,255,255,0.14);
+            color:#fff;
+            padding:6px 12px;
+            border-radius:20px;
+            cursor:pointer;
+        }
+        .export-btn-header{
+            position:absolute;
+            top:16px;
+            right:18px;
+            border:1px solid rgba(255,255,255,0.45);
+            background:rgba(255,255,255,0.14);
+            color:#fff;
+            padding:6px 12px;
+            border-radius:20px;
+            cursor:pointer;
+        }
+        header h1{
+            font-size:2.1rem;
+            margin-bottom:8px;
+        }
+        header p{
+            opacity:0.92;
+        }
+
+        /* 统计面板 */
+        .stat-box{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:12px;
+            margin-bottom:24px;
+        }
+        .stat-item{
+            background:var(--bg-card);
+            text-align:center;
+            padding:16px;
+            border-radius:12px;
+            box-shadow:var(--shadow);
+        }
+        .stat-num{
+            font-size:24px;
+            font-weight:bold;
+            color:var(--primary);
+        }
+
+        /* 搜索框 */
+        .search-box{
+            margin-bottom:24px;
+        }
+        #searchInput{
+            width:100%;
+            padding:12px 16px;
+            border-radius:30px;
+            border:none;
+            box-shadow:var(--shadow);
+            font-size:1rem;
+            background:var(--bg-card);
+            color:var(--text-main);
+        }
+
+        .nav{
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+            justify-content:center;
+            margin-bottom:28px;
+        }
+        .nav a{
+            background:var(--bg-card);
+            color:var(--primary);
+            padding:9px 20px;
+            border-radius:28px;
+            text-decoration:none;
+            box-shadow:var(--shadow);
+            transition:0.24s;
+        }
+        .nav a:hover{
+            background:var(--primary);
+            color:#fff;
+        }
+
+        /* 标签筛选 */
+        .tag-filter{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            margin-bottom:16px;
+        }
+        .tag{
+            padding:4px 12px;
+            border-radius:16px;
+            background:var(--tag-bg);
+            color:var(--tag-color);
+            font-size:0.85rem;
+            cursor:pointer;
+        }
+        .tag.active{
+            background:var(--primary);
+            color:#fff;
+        }
+
+        .card{
+            background-color:var(--bg-card);
+            border-radius:var(--border-radius);
+            padding:28px;
+            margin-bottom:24px;
+            box-shadow:var(--shadow);
+        }
+        .card h2{
+            border-left:4px solid var(--primary);
+            padding-left:12px;
+            margin-bottom:18px;
+            font-size:1.38rem;
+        }
+        form{
+            background-color:var(--bg-form);
+            padding:18px;
+            border-radius:12px;
+            margin-bottom:18px;
+        }
+        textarea,input[type="text"],select{
+            width:100%;
+            border:1px solid #cbd5e177;
+            border-radius:8px;
+            padding:10px 12px;
+            margin-bottom:12px;
+            font-size:1rem;
+            background:var(--bg-card);
+            color:var(--text-main);
+        }
+        textarea{
+            min-height:90px;
+            resize:vertical;
+        }
+        .btn{
+            background-color:var(--primary);
+            border:none;
+            color:white;
+            padding:8px 18px;
+            border-radius:8px;
+            cursor:pointer;
+        }
+        .btn-del{
+            background:#ef4444;
+            font-size:0.8rem;
+            padding:4px 8px;
+        }
+        .item-wrap{
+            padding:14px 16px;
+            background-color:var(--bg-form);
+            border-radius:10px;
+            margin-bottom:12px;
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            gap:10px;
+        }
+        .quote-item{
+            background-color:rgba(252,248,238,0.65);
+        }
+        body.dark .quote-item{
+            background-color:#343027;
+        }
+        .link-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+            gap:12px;
+        }
+        .link-card{
+            background-color:var(--bg-form);
+            text-align:center;
+            padding:14px;
+            border-radius:12px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        }
+        .link-card a{
+            color:var(--text-main);
+            text-decoration:none;
+            flex-grow:1;
+        }
+        footer{
+            text-align:center;
+            padding:30px;
+            color:var(--text-sub);
+            font-size:0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <button class="theme-toggle" id="switchTheme">切换深色</button>
+            <button class="export-btn-header" id="exportAll">导出备份</button>
+            <h1>个人资料库</h1>
+            <p>笔记 · 摘抄文案 · 链接收藏 | 私有知识库</p>
+        </header>
+
+        <!-- 数据统计 -->
+        <div class="stat-box">
+            <div class="stat-item">
+                <div class="stat-num" id="numNote">0</div>
+                <div class="stat-text">笔记总数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="numQuote">0</div>
+                <div class="stat-text">文案总数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="numLink">0</div>
+                <div class="stat-text">链接收藏</div>
+            </div>
+        </div>
+
+        <!-- 全局搜索 -->
+        <div class="search-box">
+            <input id="searchInput" placeholder="🔍 搜索笔记、文案、链接..." />
+        </div>
+
+        <div class="nav">
+            <a href="#about">关于</a>
+            <a href="#notes">笔记</a>
+            <a href="#words">文案语录</a>
+            <a href="#links">常用链接</a>
+        </div>
+
+        <div class="card" id="about">
+            <h2>关于本站</h2>
+            <p>私人知识库，用于永久保存笔记、金句文案、常用工具链接。支持标签分类、全局搜索、明暗主题切换，数据本地永久保存。</p>
+            <p style="margin-top:8px;color:var(--text-sub)">提示：定期点右上角【导出备份】下载txt文件妥善保存，防止清理浏览器数据丢失记录。</p>
+        </div>
+
+        <div class="card" id="notes">
+            <h2>📒学习笔记</h2>
+            <!-- 标签筛选 -->
+            <div class="tag-filter" id="tagFilter">
+                <div class="tag active" data-tag="all">全部</div>
+                <div class="tag" data-tag="学习">学习</div>
+                <div class="tag" data-tag="生活">生活</div>
+                <div class="tag" data-tag="技术">技术</div>
+                <div class="tag" data-tag="感悟">感悟</div>
+            </div>
+            <form id="noteForm">
+                <select id="noteTag">
+                    <option value="学习">学习</option>
+                    <option value="生活">生活</option>
+                    <option value="技术">技术</option>
+                    <option value="感悟">感悟</option>
+                </select>
+                <textarea id="noteInput" placeholder="在这里写下笔记内容..." required></textarea>
+                <button class="btn" type="submit">新增笔记</button>
+            </form>
+            <div id="noteList"></div>
+        </div>
+
+        <div class="card" id="words">
+            <h2>✍️文案金句</h2>
+            <form id="quoteForm">
+                <textarea id="quoteInput" placeholder="粘贴喜欢的句子、摘抄..." required></textarea>
+                <button class="btn" type="submit">保存文案</button>
+            </form>
+            <div id="quoteList"></div>
+        </div>
+
+        <div class="card" id="links">
+            <h2>🔗链接收藏</h2>
+            <form id="linkForm">
+                <input type="text" id="linkName" placeholder="名称，例如：AI工具站" required>
+                <input type="text" id="linkUrl" placeholder="完整网址，https://xxx..." required>
+                <button class="btn" type="submit">添加链接</button>
+            </form>
+            <div class="link-grid" id="linkList"></div>
+        </div>
+
+        <footer>
+            Personal Knowledge Base © 2026
+        </footer>
+    </div>
+
+<script>
+//存储键名
+const KEY_NOTES = "kb_notes";
+const KEY_QUOTES = "kb_quotes";
+const KEY_LINKS = "kb_links";
+
+//全局变量
+let currentTag = "all";
+let searchKey = "";
+
+//读取本地数据
+function loadData(key){
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : [];
+}
+function saveData(key,arr){
+    localStorage.setItem(key,JSON.stringify(arr));
+}
+
+//更新统计
+function updateStat(){
+    document.getElementById("numNote").innerText = loadData(KEY_NOTES).length;
+    document.getElementById("numQuote").innerText = loadData(KEY_QUOTES).length;
+    document.getElementById("numLink").innerText = loadData(KEY_LINKS).length;
+}
+
+//导出全部备份
+document.getElementById("exportAll").addEventListener("click",()=>{
+    const notes = loadData(KEY_NOTES);
+    const quotes = loadData(KEY_QUOTES);
+    const links = loadData(KEY_LINKS);
+    let text = "=====个人知识库备份=====\n";
+    text += `备份时间：${new Date().toLocaleString()}\n\n`;
+
+    text += "【笔记】\n";
+    notes.forEach((n,i)=>{
+        text += `[标签:${n.tag}] ${n.content}\n`;
+    });
+
+    text += "\n【文案语录】\n";
+    quotes.forEach((q,i)=>{
+        text += q+"\n";
+    });
+
+    text += "\n【链接收藏】\n";
+    links.forEach(l=>{
+        text += `${l.name} -> ${l.url}\n`;
+    });
+
+    const blob = new Blob([text],{type:"text/plain"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    const dateStr = new Date().toISOString().slice(0,10);
+    a.download = `知识库备份_${dateStr}.txt`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+})
+
+// --------笔记模块（带标签）--------
+function renderNotes(){
+    let arr = loadData(KEY_NOTES);
+    //标签筛选
+    if(currentTag !== "all"){
+        arr = arr.filter(item=>item.tag === currentTag);
+    }
+    //搜索筛选
+    if(searchKey){
+        arr = arr.filter(item=>item.content.includes(searchKey));
+    }
+
+    const dom = document.getElementById("noteList");
+    dom.innerHTML = "";
+    arr.forEach((item,idx)=>{
+        const wrap = document.createElement("div");
+        wrap.className = "item-wrap";
+        wrap.innerHTML = `
+        <div>
+            <span style="font-size:12px;background:var(--tag-bg);padding:2px 8px;border-radius:10px;">${item.tag}</span>
+            <div style="margin-top:6px;">${item.content}</div>
+        </div>
+        <button class="btn btn-del" data-t="note" data-i="${idx}">删除</button>`;
+        dom.appendChild(wrap);
+    })
+}
+document.getElementById("noteForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    const val = document.getElementById("noteInput").value.trim();
+    const tag = document.getElementById("noteTag").value;
+    if(!val) return;
+    const arr = loadData(KEY_NOTES);
+    arr.push({content:val,tag:tag});
+    saveData(KEY_NOTES,arr);
+    document.getElementById("noteInput").value = "";
+    renderNotes();
+    updateStat();
+})
+
+//标签点击筛选
+document.querySelectorAll("#tagFilter .tag").forEach(t=>{
+    t.onclick=()=>{
+        document.querySelectorAll("#tagFilter .tag").forEach(x=>x.classList.remove("active"));
+        t.classList.add("active");
+        currentTag = t.dataset.tag;
+        renderNotes();
+    }
+})
+
+// --------文案模块--------
+function renderQuotes(){
+    let arr = loadData(KEY_QUOTES);
+    if(searchKey){
+        arr = arr.filter(v=>v.includes(searchKey));
+    }
+    const dom = document.getElementById("quoteList");
+    dom.innerHTML = "";
+    arr.forEach((text,idx)=>{
+        const wrap = document.createElement("div");
+        wrap.className = "item-wrap quote-item";
+        wrap.innerHTML = `<div>${text}</div><button class="btn btn-del" data-t="quote" data-i="${idx}">删除</button>`;
+        dom.appendChild(wrap);
+    })
+}
+document.getElementById("quoteForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    const val = document.getElementById("quoteInput").value.trim();
+    if(!val) return;
+    const arr = loadData(KEY_QUOTES);
+    arr.push(val);
+    saveData(KEY_QUOTES,arr);
+    document.getElementById("quoteInput").value = "";
+    renderQuotes();
+    updateStat();
+})
+
+// --------链接模块--------
+function renderLinks(){
+    let arr = loadData(KEY_LINKS);
+    if(searchKey){
+        arr = arr.filter(v=>v.name.includes(searchKey)||v.url.includes(searchKey));
+    }
+    const dom = document.getElementById("linkList");
+    dom.innerHTML = "";
+    arr.forEach((item,idx)=>{
+        const wrap = document.createElement("div");
+        wrap.className = "link-card";
+        wrap.innerHTML = `<a href="${item.url}" target="_blank">${item.name}</a>
+        <button class="btn btn-del" data-t="link" data-i="${idx}">×</button>`;
+        dom.appendChild(wrap);
+    })
+}
+document.getElementById("linkForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    const name = document.getElementById("linkName").value.trim();
+    const url = document.getElementById("linkUrl").value.trim();
+    if(!name||!url) return;
+    const arr = loadData(KEY_LINKS);
+    arr.push({name,url});
+    saveData(KEY_LINKS,arr);
+    document.getElementById("linkName").value = "";
+    document.getElementById("linkUrl").value = "";
+    renderLinks();
+    updateStat();
+})
+
+//统一删除事件
+document.body.addEventListener("click",ev=>{
+    const el = ev.target;
+    if(el.classList.contains("btn-del")){
+        const t = el.dataset.t;
+        const idx = Number(el.dataset.i);
+        let key,arr;
+        if(t==="note"){
+            key = KEY_NOTES;arr=loadData(key);
+        }else if(t==="quote"){
+            key = KEY_QUOTES;arr=loadData(key);
+        }else if(t==="link"){
+            key = KEY_LINKS;arr=loadData(key);
+        }
+        arr.splice(idx,1);
+        saveData(key,arr);
+        renderNotes();renderQuotes();renderLinks();updateStat();
+    }
+})
+
+//全局搜索
+document.getElementById("searchInput").oninput=function(){
+    searchKey = this.value.trim();
+    renderNotes();renderQuotes();renderLinks();
+}
+
+//深色浅色切换
+const toggleBtn = document.getElementById("switchTheme");
+toggleBtn.addEventListener("click",()=>{
+    document.body.classList.toggle("dark");
+    if(document.body.classList.contains("dark")){
+        toggleBtn.textContent="切换浅色";
+        localStorage.setItem("kb_dark","1");
+    }else{
+        toggleBtn.textContent="切换深色";
+        localStorage.setItem("kb_dark","0");
+    }
+})
+if(localStorage.getItem("kb_dark")==="1"){
+    document.body.classList.add("dark");
+    toggleBtn.textContent="切换浅色";
+}
+
+//初始化渲染
+renderNotes();
+renderQuotes();
+renderLinks();
+updateStat();
+</script>
+</body>
+</html>
